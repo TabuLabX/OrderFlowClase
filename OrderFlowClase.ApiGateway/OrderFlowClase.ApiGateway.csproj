@@ -15,8 +15,8 @@
 	<PackageReference Include="Microsoft.Extensions.ServiceDiscovery.Yarp" />
 	<PackageReference Include="Yarp.ReverseProxy" />
 	<PackageReference Include="RedisRateLimiting" />
-	<PackageReference Include="RedisRateLimiting.AspNetCore"  />
-	<PackageReference Include="StackExchange.Redis"  />
+	<PackageReference Include="RedisRateLimiting.AspNetCore" />
+	<PackageReference Include="StackExchange.Redis" />
   </ItemGroup>
 
 </Project>
