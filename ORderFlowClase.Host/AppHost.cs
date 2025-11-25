@@ -1,10 +1,18 @@
+using System.Security.Principal;
+
 var builder = DistributedApplication.CreateBuilder(args);
 
 var postgres = builder
     .AddPostgres("postgres")
     .WithLifetime(ContainerLifetime.Persistent)
-    .WithDataVolume("postgres-data-identity")
+    .WithDataVolume("postgres")
     .WithPgAdmin(pgAdmin => pgAdmin.WithHostPort(5050));
+
+var redis = builder.AddRedis("redis")
+    .WithLifetime(ContainerLifetime.Persistent)
+    .WithDataVolume("redis-data-identity")
+    .WithRedisInsight();
+
 
 var db = postgres.AddDatabase("identity");
 
