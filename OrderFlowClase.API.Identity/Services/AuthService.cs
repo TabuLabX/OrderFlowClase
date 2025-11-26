@@ -11,16 +11,13 @@ namespace OrderFlowClase.API.Identity.Services
     {
 
         private UserManager<IdentityUser> _userManager;
-        private RoleManager<IdentityRole> _roleManager;
         private readonly IConfiguration _configuration;
 
         public AuthService(
             UserManager<IdentityUser> userManager,
-            RoleManager<IdentityRole> roleManager,
             IConfiguration configuration)
         {
             _userManager = userManager;
-            _roleManager = roleManager;
             _configuration = configuration;
         }
 
@@ -65,7 +62,7 @@ namespace OrderFlowClase.API.Identity.Services
                 issuer: issuer,
                 audience: audience,
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(expirationMinutes),
+                expires: DateTime.UtcNow.AddMinutes(expirationMinutes),
                 signingCredentials: creds
             );
 

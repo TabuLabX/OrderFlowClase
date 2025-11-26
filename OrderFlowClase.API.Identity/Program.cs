@@ -1,10 +1,12 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using OrderFlowClase.API.Identity;
 using OrderFlowClase.API.Identity.Services;
+using Scalar.AspNetCore;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,12 +16,18 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddUserSecrets(typeof(Program).Assembly, true);
 
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 builder.AddServiceDefaults();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+
+// Add Bearer token auth to openapi
+builder.Services.AddOpenApi(options =>
+{
+    
+});
 
 
 builder.Services.AddApiVersioning(options =>
@@ -38,26 +46,9 @@ builder.Services.AddApiVersioning(options =>
     options.SubstituteApiVersionInUrl = true;
 });
 
-builder.Services.AddAuthentication();
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-        .AddJwtBearer(options =>
-        {
-            options.TokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = builder.Configuration.GetSection("JWT:Issuer").Value,
-                ValidAudience = builder.Configuration.GetSection("JWT:Audience").Value,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetSection("JWT:SecretKey").Value!))
-            };
-        });
-
 builder.AddNpgsqlDbContext<MyAppContext>("identity");
 
-
+// Configure Identity BEFORE Authentication
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 {
     // Password settings
@@ -78,9 +69,32 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
     // Sign in settings
     options.SignIn.RequireConfirmedEmail = false; // Set to true in production
 })
+//.AddRoles<IdentityRole>()
 .AddEntityFrameworkStores<MyAppContext>()
 .AddDefaultTokenProviders();
 
+// Configure Authentication with JWT as default
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration.GetSection("JWT:Issuer").Value,
+        ValidAudience = builder.Configuration.GetSection("JWT:Audience").Value,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetSection("JWT:SecretKey").Value!))
+    };
+});
+
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -88,6 +102,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.MapScalarApiReference();
 
     app.UseSwaggerUI(options =>
     {

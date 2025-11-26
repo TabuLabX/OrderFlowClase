@@ -28,8 +28,10 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" />
+    <PackageReference Include="Scalar.AspNetCore" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" />
-	  <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+	<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" />
+	<PackageReference Include="Microsoft.OpenApi" />
   </ItemGroup>
 
   <ItemGroup>
